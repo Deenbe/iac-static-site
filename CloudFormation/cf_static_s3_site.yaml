@@ -1,0 +1,167 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  DomainName:
+    Description: The FQ domain name for the site
+    Type: String
+  R53ZoneId:
+    Description: The Route53 Zone Id
+    Type: AWS::Route53::HostedZone::Id
+Resources:
+  SiteS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${AWS::StackName}-site-bucket'
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+  
+  CloudfrontOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: S3 Access Identity for the site
+
+  SiteS3BucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref SiteS3Bucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 's3:GetObject'
+            Effect: Allow
+            Resource: !Join ['',[!GetAtt SiteS3Bucket.Arn,'/*']]
+            Principal: 
+              AWS: !Sub 'arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudfrontOriginAccessIdentity}'
+  
+  ACMCertificate: 
+    Type: "AWS::CertificateManager::Certificate"
+    Properties: 
+      DomainName: !Ref DomainName
+      DomainValidationOptions:
+        - DomainName: !Ref DomainName
+          HostedZoneId: !Ref R53ZoneId
+      ValidationMethod: DNS 
+
+  RequestProcessingFunction:
+    Type: AWS::CloudFront::Function
+    Properties: 
+      Name: !Sub "${AWS::StackName}-RequestHandler"
+      FunctionConfig: 
+        Comment: Request processing CF Function
+        Runtime: cloudfront-js-1.0
+      AutoPublish: true
+      FunctionCode: !Sub |
+        function handler(event) {
+          var request = event.request;
+          var headers = request.headers;
+          var uri = request.uri;
+          var version = 'live';
+            
+          if (headers['app-version']) {
+              version = headers['app-version'].value;
+          }
+          if(uri.endsWith('/'))
+          {
+              request.uri = '/' + version + uri + "index.html";
+          }
+          else
+          {
+              request.uri = '/' + version + uri;
+          }
+          console.log("new uri: " + request.uri);
+          return request;
+        }
+  
+  ResponseProcessingFunction:
+    Type: AWS::CloudFront::Function
+    Properties: 
+      Name:  !Sub "${AWS::StackName}-ResponseHandler"
+      FunctionConfig: 
+        Comment: Response processing CF Function
+        Runtime: cloudfront-js-1.0
+      AutoPublish: true
+      FunctionCode: !Sub |
+        function handler(event) {
+          var response = event.response;
+          var request = event.request;
+          var headers = response.headers;
+            
+          // Set the environment header
+          if(request.uri.startsWith('/alpha'))
+          {
+              headers['site-version'] = {value: 'alpha'};   
+          }
+          else if(request.uri.startsWith('/beta'))
+          {
+              headers['site-version'] = {value: 'beta'};   
+          }
+          return response;
+        }
+
+  CloudFrontDistro:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+          - DomainName:
+              !GetAtt SiteS3Bucket.DomainName
+            Id: !Sub '${DomainName}.s3Origin'
+            S3OriginConfig:
+              OriginAccessIdentity: !Join [ "", [ "origin-access-identity/cloudfront/", !Ref CloudfrontOriginAccessIdentity ] ]
+        DefaultRootObject: index.html
+        Aliases:
+          - !Ref DomainName
+        DefaultCacheBehavior:
+          CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+          AllowedMethods:
+          - GET
+          - HEAD
+          TargetOriginId: !Sub '${DomainName}.s3Origin'
+          Compress: true
+          ViewerProtocolPolicy: redirect-to-https
+          FunctionAssociations:
+            - EventType: viewer-request
+              FunctionARN: !GetAtt RequestProcessingFunction.FunctionARN
+            - EventType: viewer-response
+              FunctionARN: !GetAtt ResponseProcessingFunction.FunctionARN
+        ViewerCertificate:
+          AcmCertificateArn: !Ref ACMCertificate
+          MinimumProtocolVersion: TLSv1.2_2019
+          SslSupportMethod: sni-only
+        Enabled: true
+        HttpVersion: http2
+  
+  SiteIPv4DnsRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref R53ZoneId
+      Comment: DNS record for the site.
+      Name: !Ref DomainName
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt CloudFrontDistro.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
+  
+  SiteIPv6DnsRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref R53ZoneId
+      Comment: DNS record for the site.
+      Name: !Ref DomainName
+      Type: AAAA
+      AliasTarget:
+        DNSName: !GetAtt CloudFrontDistro.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2  
+  
+Outputs:
+  SiteS3BucketName:
+    Value: !Ref SiteS3Bucket
+    Description: Name of S3 bucket
+  SiteAddress:
+    Value: !Join ['',['https://',!Ref SiteIPv4DnsRecord]]
+    Description: Site Address
