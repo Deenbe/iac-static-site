@@ -1,11 +1,19 @@
 <html>
 <head>
     <title>Welcome to the website</title>
-    <script src="/js/alert.js"></script>
+    <script src="/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+    var headers = response.headers;
+    if (headers['app-version']) {
+    //$(document).ready(function(){});
+        alert(headers['app-version'].value);
+    }
+    </script>
 </head>
 <body>
+    <span id="environmentBanner"></span>
     <h1>Welcome to the website</h1>
-    <p>This is content deployment, managed and served from my AWS account.  This demo leverages the following technologies:
+    <p>This demo leverages the following technologies:
         <ul>
             <li>CloudFront and CloudFront Functions</li>
             <li>S3</li>
