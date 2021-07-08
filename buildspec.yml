@@ -15,7 +15,7 @@ phases:
     commands:
       - echo Entered the build phase..
       - cd Site
-      - aws s3 sync . s3://iac-poc-site-site-bucket/alpha --recursive --delete --region us-east-1
+      - aws s3 sync . s3://iac-poc-site-site-bucket/alpha --delete --region us-east-1
     finally:
       - echo This always runs even if the install command fails
   post_build:
