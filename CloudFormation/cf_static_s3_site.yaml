@@ -92,13 +92,9 @@ Resources:
           var headers = response.headers;
             
           // Set the environment header
-          if(request.uri.startsWith('/alpha'))
+          if(request.uri.startsWith('/test'))
           {
-              headers['site-version'] = {value: 'alpha'};   
-          }
-          else if(request.uri.startsWith('/beta'))
-          {
-              headers['site-version'] = {value: 'beta'};   
+              headers['site-version'] = {value: 'test'};   
           }
           return response;
         }
@@ -356,7 +352,7 @@ Resources:
             Configuration:
               ConnectionArn: !Ref GitHubConnection
               FullRepositoryId: 'jonesaws/iac-static-site'
-              BranchName: alpha
+              BranchName: test
               DetectChanges: true
               OutputArtifactFormat: CODE_ZIP
             OutputArtifacts:
@@ -374,7 +370,51 @@ Resources:
               Provider: CodeBuild
             Configuration:
               ProjectName: !Ref WebsiteCodeBuildProject
-              EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"alpha"},{"name":"S3_BUCKET","value":"',!Ref SiteS3Bucket,'"}]']]
+              EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"S3_BUCKET","value":"',!Ref SiteS3Bucket,'"}]']]
+            OutputArtifacts:
+            - Name: BuildOutput
+  
+  LiveDeployPipeline:
+    Type: "AWS::CodePipeline::Pipeline"
+    Properties:
+      Name: !Sub "${AWS::StackName}-Live-Pipeline"
+      RoleArn: !GetAtt CodePipelineRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref ArtifactS3Bucket
+      Stages:
+        - Name: Source
+          Actions:
+          - Name: Source
+            RunOrder: 1
+            InputArtifacts: []
+            ActionTypeId:
+              Category: Source
+              Owner: AWS
+              Version: '1'
+              Provider: CodeStarSourceConnection
+            Configuration:
+              ConnectionArn: !Ref GitHubConnection
+              FullRepositoryId: 'jonesaws/iac-static-site'
+              BranchName: live
+              DetectChanges: true
+              OutputArtifactFormat: CODE_ZIP
+            OutputArtifacts:
+            - Name: SourceOutput
+        - Name: Deploy
+          Actions:
+          - Name: Deploy-to-S3
+            RunOrder: 1
+            InputArtifacts:
+            - Name: SourceOutput
+            ActionTypeId:
+              Category: Build
+              Owner: AWS
+              Version: '1'
+              Provider: CodeBuild
+            Configuration:
+              ProjectName: !Ref WebsiteCodeBuildProject
+              EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"live"},{"name":"S3_BUCKET","value":"',!Ref SiteS3Bucket,'"}]']]
             OutputArtifacts:
             - Name: BuildOutput
 
