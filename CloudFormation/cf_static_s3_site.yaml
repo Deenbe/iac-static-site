@@ -330,10 +330,10 @@ Resources:
                 Resource:
                   - "*"
   
-  AlphaDeployPipeline:
+  TestDeployPipeline:
     Type: "AWS::CodePipeline::Pipeline"
     Properties:
-      Name: !Sub "${AWS::StackName}-Alpha-Pipeline"
+      Name: !Sub "${AWS::StackName}-Test-Pipeline"
       RoleArn: !GetAtt CodePipelineRole.Arn
       ArtifactStore:
         Type: S3
