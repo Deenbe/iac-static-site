@@ -62,17 +62,11 @@ Resources:
           var uri = request.uri;
           var version = 'live';
             
-          if (headers['app-version']) {
-              version = headers['app-version'].value;
-          }
-          if(uri.endsWith('/'))
-          {
-              request.uri = '/' + version + uri + "index.html";
-          }
-          else
-          {
-              request.uri = '/' + version + uri;
-          }
+          if (headers['app-version']) version = headers['app-version'].value;
+
+          if(uri.endsWith('/') || uri.endsWith('/about') || uri.endsWith('/contact')) request.uri = '/' + version + '/index.html';
+          else request.uri = '/' + version + uri;
+
           console.log("new uri: " + request.uri);
           return request;
         }
@@ -92,10 +86,8 @@ Resources:
           var headers = response.headers;
             
           // Set the environment header
-          if(request.uri.startsWith('/test'))
-          {
-              headers['site-version'] = {value: 'test'};   
-          }
+          if(request.uri.startsWith('/test')) headers['site-version'] = {value: 'test'};   
+
           return response;
         }
 
