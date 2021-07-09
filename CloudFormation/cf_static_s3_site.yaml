@@ -6,6 +6,9 @@ Parameters:
   R53ZoneId:
     Description: The Route53 Zone Id
     Type: AWS::Route53::HostedZone::Id
+  GitHubRepositoryId:
+    Description: "The GitHub Repo Id (typically everything following https://github.com/ in the repo url)"
+    Type: String
 Resources:
   SiteS3Bucket:
     Type: AWS::S3::Bucket
@@ -343,7 +346,7 @@ Resources:
               Provider: CodeStarSourceConnection
             Configuration:
               ConnectionArn: !Ref GitHubConnection
-              FullRepositoryId: 'jonesaws/iac-static-site'
+              FullRepositoryId: !Ref GitHubRepositoryId
               BranchName: test
               DetectChanges: true
               OutputArtifactFormat: CODE_ZIP
