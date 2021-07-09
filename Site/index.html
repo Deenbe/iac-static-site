@@ -1,26 +1,15 @@
-<html>
-<head>
-    <title>Welcome to the website</title>
-    <script src="/js/jquery-3.6.0.min.js"></script>
-    <script type="text/javascript">
-    var headers = response.headers;
-    if (headers['app-version']) {
-    //$(document).ready(function(){});
-        alert(headers['app-version'].value);
-    }
-    </script>
-</head>
-<body>
-    <span id="environmentBanner"></span>
-    <h1>Welcome to the website</h1>
-    <p>This demo leverages the following technologies:
-        <ul>
-            <li>CloudFront and CloudFront Functions</li>
-            <li>S3</li>
-            <li>CloudFormation</li>
-            <li>CodePipeline</li>
-            <li>CodeDeploy</li>
-        </ul>
-    </p>
-</body>
+<!doctype html>
+<html lang="en">
+  <head>
+    <script src="js/app.js"></script>
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/about">About</a></li>
+      </ul>
+    </nav>
+    <main></main>
+  </body>
 </html>
