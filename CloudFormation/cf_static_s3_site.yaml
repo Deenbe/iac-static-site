@@ -414,9 +414,13 @@ Resources:
             - Name: BuildOutput
 
 Outputs:
+  AssetS3BucketName:
+    Value: !Ref ArtifactS3Bucket
+    Description: Name of the S3 Asset Bucket
   SiteS3BucketName:
     Value: !Ref SiteS3Bucket
-    Description: Name of S3 bucket
+    Description: Name of S3 Site bucket
   SiteAddress:
     Value: !Join ['',['https://',!Ref SiteIPv4DnsRecord]]
     Description: Site Address
+  

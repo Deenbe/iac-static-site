@@ -35,6 +35,7 @@ This project is a demonstration of AWS capability for hosting single page applic
 * Provide feedback to jonesaws@amazon.com 
 
 ## Cleanup
-* Empty the S3 bucket created by the CF stack
+* Empty the Site S3 bucket created by the CF stack (CF Stack output "SiteS3BucketName")
+* Empty the Asset S3 bucket created by the CF stack (CF Stack output "AssetS3BucketName")
 * Delete the stack via CloudFormation
 * Cleanup the ACM verification CNAME created in your Route53 Zone (frustratingly, that doesn't get cleaned up with the stack)
