@@ -6,15 +6,15 @@ function renderApp() {
     var title;
     if (window.location.pathname === '/about') {
       title = "SPA - About";
-      content = '<h1>Welcome to the About page</h1><p>This a simple demonstration of a SPA behind CloudFront, served from S3 with deep linking capability.</p>';
+      content = '<h2>Welcome to the About page</h2><p>This a simple demonstration of an IaC deployed Single Page App behind CloudFront, served from a secure S3 bucket with deep linking capability.</p>';
     }
     else if (window.location.pathname === '/contact') {
         title = "SPA - Contact";
-        content = '<h1>Welcome to the Contact page</h1><p>This a simple demonstration of a SPA behind CloudFront, served from S3 with deep linking capability.</p>';
+        content = '<h2>Welcome to the Contact page</h2><p>This a simple demonstration of an IaC deployed Single Page App behind CloudFront, served from a secure S3 bucket with deep linking capability.</p>';
     }
     else if (window.location.pathname === '/') {
       title = "SPA - Home";
-      content = '<h1>Welcome to the Demo Single Page App :)</h1><p>This a simple demonstration of a SPA behind CloudFront, served from S3 with deep linking capability.</p>'
+      content = '<h2>Welcome to the Demo Single Page App :)</h2><p>This a simple demonstration of an IaC deployed Single Page App behind CloudFront, served from a secure S3 bucket with deep linking capability.</p>'
     }
     var main = document.getElementsByTagName('main')[0];
     document.title = title;
