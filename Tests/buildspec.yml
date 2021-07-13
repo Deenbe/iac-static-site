@@ -27,7 +27,11 @@ phases:
     commands:
       - echo Entered the post_build phase...
       - echo Build completed on `date`
-
+reports:
+  regression-suite:
+    files:
+      - 'Tests/tests/results.xml'
+    file-format: JUNITXML
 artifacts:
   files:
-    - 'Tests/tests/results.xml'
+    - "**/*"
