@@ -411,10 +411,10 @@ Resources:
               InputArtifacts:
                 - Name: DeployTestSuiteOutput
               ActionTypeId:
-                category: Test
-                owner: AWS
-                provider: DeviceFarm
-                version: '1'
+                Category: Test
+                Owner: AWS
+                Provider: DeviceFarm
+                Version: '1'
               Configuration:
                 App: test_bundle.zip
                 AppType: Web
