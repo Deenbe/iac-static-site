@@ -9,6 +9,8 @@ phases:
       - pip3 install -U pytest
       - pytest --version
       - pip3 install Appium-Python-Client
+      - wget https://github.com/lightbody/browsermob-proxy/releases/download/browsermob-proxy-2.1.4/browsermob-proxy-2.1.4-bin.zip
+      - unzip browsermob-proxy-2.1.4-bin.zip
     finally:
       - echo This always runs even if the update or install command fails 
   pre_build:
