@@ -212,8 +212,9 @@ Resources:
   WebsiteCodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: !Sub ${AWS::StackName}-build-project
+      Name: !Sub ${AWS::StackName}-site-build-project
       Description: CodeBuild Project to deploy the website
+      BuildSpec: Site/buildspec.yml
       ServiceRole: !GetAtt CodeBuildServiceRole.Arn
       Artifacts:
         Type: CODEPIPELINE
@@ -221,6 +222,24 @@ Resources:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+      Source:
+        Type:  CODEPIPELINE
+      TimeoutInMinutes: 10
+  
+  #code build - api deployment using SAM (see buildspec.yml)
+  TestSuiteCodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub ${AWS::StackName}-test-suite-build-project
+      Description: CodeBuild Project to build the python test suite archive
+      BuildSpec: Tests/buildspec.yml
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/eb-python-3.4-amazonlinux-64:2.3.2
       Source:
         Type:  CODEPIPELINE
       TimeoutInMinutes: 10
@@ -312,7 +331,9 @@ Resources:
                 Action:
                   - "codebuild:BatchGetBuilds"
                   - "codebuild:StartBuild"
-                Resource: !GetAtt WebsiteCodeBuildProject.Arn
+                Resource: 
+                  - !GetAtt WebsiteCodeBuildProject.Arn
+                  - !GetAtt TestSuiteCodeBuildProject.Arn
               -
                 Effect: "Allow"
                 Action:
@@ -325,54 +346,10 @@ Resources:
                 Resource:
                   - "*"
   
-  TestDeployPipeline:
+  DeploymentPipeline:
     Type: "AWS::CodePipeline::Pipeline"
     Properties:
-      Name: !Sub "${AWS::StackName}-Test-Pipeline"
-      RoleArn: !GetAtt CodePipelineRole.Arn
-      ArtifactStore:
-        Type: S3
-        Location: !Ref ArtifactS3Bucket
-      Stages:
-        - Name: Source
-          Actions:
-          - Name: Source
-            RunOrder: 1
-            InputArtifacts: []
-            ActionTypeId:
-              Category: Source
-              Owner: AWS
-              Version: '1'
-              Provider: CodeStarSourceConnection
-            Configuration:
-              ConnectionArn: !Ref GitHubConnection
-              FullRepositoryId: !Ref GitHubRepositoryId
-              BranchName: test
-              DetectChanges: true
-              OutputArtifactFormat: CODE_ZIP
-            OutputArtifacts:
-            - Name: SourceOutput
-        - Name: Deploy
-          Actions:
-          - Name: Deploy-to-S3
-            RunOrder: 1
-            InputArtifacts:
-            - Name: SourceOutput
-            ActionTypeId:
-              Category: Build
-              Owner: AWS
-              Version: '1'
-              Provider: CodeBuild
-            Configuration:
-              ProjectName: !Ref WebsiteCodeBuildProject
-              EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"S3_BUCKET","value":"',!Ref SiteS3Bucket,'"}]']]
-            OutputArtifacts:
-            - Name: BuildOutput
-  
-  LiveDeployPipeline:
-    Type: "AWS::CodePipeline::Pipeline"
-    Properties:
-      Name: !Sub "${AWS::StackName}-Live-Pipeline"
+      Name: !Sub "${AWS::StackName}-Pipeline"
       RoleArn: !GetAtt CodePipelineRole.Arn
       ArtifactStore:
         Type: S3
@@ -396,9 +373,61 @@ Resources:
               OutputArtifactFormat: CODE_ZIP
             OutputArtifacts:
             - Name: SourceOutput
-        - Name: Deploy
+        - Name: BuildTestSuite
           Actions:
-          - Name: Deploy-to-S3
+          - Name: Build-py-test-suite
+            RunOrder: 1
+            InputArtifacts:
+            - Name: SourceOutput
+            ActionTypeId:
+              Category: Build
+              Owner: AWS
+              Version: '1'
+              Provider: CodeBuild
+            Configuration:
+              ProjectName: !Ref TestSuiteCodeBuildProject
+              #EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"S3_BUCKET","value":"',!Ref SiteS3Bucket,'"}]']]
+            OutputArtifacts:
+        - Name: DeployTest
+          Actions:
+          - Name: Deploy-to-S3-live
+            RunOrder: 1
+            InputArtifacts:
+            - Name: SourceOutput
+            ActionTypeId:
+              Category: Build
+              Owner: AWS
+              Version: '1'
+              Provider: CodeBuild
+            Configuration:
+              ProjectName: !Ref WebsiteCodeBuildProject
+              EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"S3_BUCKET","value":"',!Ref SiteS3Bucket,'"}]']]
+            OutputArtifacts:
+        #- Name: TestSite
+        #  Actions:
+        #    - Name: TestDeviceFarm
+        #      RunOrder: 1
+        #      InputArtifacts:
+        #        - Name: SourceOutput
+        #      ActionTypeId:
+        #        category: Test
+        #        owner: AWS
+        #        provider: DeviceFarm
+        #        version: '1'
+        #      Configuration:
+        #        App: Tests/s3-web-test.ipa
+        #        AppType: Web
+        #        AppiumVersion: '1.8.1'
+        #        DevicePoolArn: arn:aws:devicefarm:us-west-2:264126593162:testgrid-project:af536ebb-b65c-4c2e-abf9-d0aa0e5ac700
+        #        FuzzEventCount: '6000'
+        #        FuzzEventThrottle: '50'
+        #        ProjectId: eec4905f-98f8-40aa-9afc-4c1cfEXAMPLE
+        #        TestType: BUILTIN_FUZZ
+        #      OutputArtifacts: []
+        #      Region: !Ref "AWS::Region"
+        - Name: DeployLive
+          Actions:
+          - Name: Deploy-to-S3-live
             RunOrder: 1
             InputArtifacts:
             - Name: SourceOutput

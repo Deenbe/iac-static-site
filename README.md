@@ -28,6 +28,8 @@ This project is a demonstration of AWS capability for hosting single page applic
 ## Taking it for a spin
 * Git clone this repo
 * Deploy ./CloudFormation/cf_static_s3_site.yaml using CloudFormation
+* Setup/activate the created CodeStar Connection via CodePipeline (CodePipeline > Settings > Connections)
+* Release a change for both pipelines (they initially fail on creation due to the connection not being setup initially)
 * Access the site using the CF Stack Output "SiteAddress"
 * Make changes to the site code, push and merge to "test" branch
 * Set a HTTP request header "app-version" = "test" to view your changes in test
