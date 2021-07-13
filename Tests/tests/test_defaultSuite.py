@@ -27,7 +27,11 @@ class TestDefaultSuite():
     elif(os.environ.get('BROWSER') == "chrome"):
       chrome_desired_capabilities = DesiredCapabilities.CHROME
       chrome_desired_capabilities["platform"] = "windows"
-      self.driver = Remote(testgrid_url_response["url"], chrome_desired_capabilities) 
+      self.driver = Remote(testgrid_url_response["url"], chrome_desired_capabilities)
+    elif(os.environ.get('BROWSER') == "ie"):
+      ie_desired_capabilities = DesiredCapabilities.INTERNETEXPLORER
+      ie_desired_capabilities["platform"] = "windows"
+      self.driver = Remote(testgrid_url_response["url"], ie_desired_capabilities)
   
   def teardown_method(self, method):
     self.driver.quit()
