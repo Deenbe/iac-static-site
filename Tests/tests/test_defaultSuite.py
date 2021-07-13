@@ -20,11 +20,11 @@ class TestDefaultSuite():
     devicefarm_client = boto3.client("devicefarm", region_name="us-west-2")
     testgrid_url_response = devicefarm_client.create_test_grid_url(projectArn=os.environ.get('DEVICE_POOL_ARN'),expiresInSeconds=300)
 
-    if(os.environ.get('BROWSER').equals("firefox")):
+    if(os.environ.get('BROWSER') == "firefox"):
       firefox_desired_capabilities = DesiredCapabilities.FIREFOX
       firefox_desired_capabilities["platform"] = "windows"
       self.driver = Remote(testgrid_url_response["url"], firefox_desired_capabilities)
-    elif(os.environ.get('BROWSER').equals("chrome")):
+    elif(os.environ.get('BROWSER') == "chrome":
       chrome_desired_capabilities = DesiredCapabilities.CHROME
       chrome_desired_capabilities["platform"] = "windows"
       self.driver = Remote(testgrid_url_response["url"], chrome_desired_capabilities) 
