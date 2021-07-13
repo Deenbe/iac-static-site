@@ -226,7 +226,6 @@ Resources:
         BuildSpec: Site/buildspec.yml
       TimeoutInMinutes: 10
   
-  #code build - api deployment using SAM (see buildspec.yml)
   TestSuiteCodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -238,7 +237,7 @@ Resources:
       Environment:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/eb-python-3.4-amazonlinux-64:2.3.2
+        Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
       Source:
         Type:  CODEPIPELINE
         BuildSpec: Tests/buildspec.yml
@@ -405,28 +404,28 @@ Resources:
               EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"S3_BUCKET","value":"',!Ref SiteS3Bucket,'"}]']]
             OutputArtifacts:
             - Name: DeployTestOutput
-        #- Name: TestSite
-        #  Actions:
-        #    - Name: TestDeviceFarm
-        #      RunOrder: 1
-        #      InputArtifacts:
-        #        - Name: SourceOutput
-        #      ActionTypeId:
-        #        category: Test
-        #        owner: AWS
-        #        provider: DeviceFarm
-        #        version: '1'
-        #      Configuration:
-        #        App: Tests/s3-web-test.ipa
-        #        AppType: Web
-        #        AppiumVersion: '1.8.1'
-        #        DevicePoolArn: arn:aws:devicefarm:us-west-2:264126593162:testgrid-project:af536ebb-b65c-4c2e-abf9-d0aa0e5ac700
-        #        FuzzEventCount: '6000'
-        #        FuzzEventThrottle: '50'
-        #        ProjectId: eec4905f-98f8-40aa-9afc-4c1cfEXAMPLE
-        #        TestType: BUILTIN_FUZZ
-        #      OutputArtifacts: []
-        #      Region: !Ref "AWS::Region"
+        - Name: TestSite
+          Actions:
+            - Name: TestDeviceFarm
+              RunOrder: 1
+              InputArtifacts:
+                - Name: DeployTestSuiteOutput
+              ActionTypeId:
+                category: Test
+                owner: AWS
+                provider: DeviceFarm
+                version: '1'
+              Configuration:
+                App: test_bundle.zip
+                AppType: Web
+                AppiumVersion: '1.8.1'
+                DevicePoolArn: arn:aws:devicefarm:us-west-2:264126593162:testgrid-project:af536ebb-b65c-4c2e-abf9-d0aa0e5ac700
+                FuzzEventCount: '6000'
+                FuzzEventThrottle: '50'
+                ProjectId: eec4905f-98f8-40aa-9afc-4c1cfEXAMPLE
+                TestType: BUILTIN_FUZZ
+              OutputArtifacts: []
+              Region: !Ref "AWS::Region"
         - Name: DeployLive
           Actions:
           - Name: Deploy-to-S3-live
