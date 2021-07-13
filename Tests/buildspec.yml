@@ -4,6 +4,11 @@ phases:
   install:
     commands:
       - echo Entered the install phase...
+      - virtualenv workspace
+      - cd workspace
+      - source bin/activate
+      - pip install pytest
+      - pip install Appium-Python-Client
     finally:
       - echo This always runs even if the update or install command fails 
   pre_build:
@@ -14,8 +19,16 @@ phases:
   build:
     commands:
       - echo Entered the build phase..
-      - cd Site
-      - aws s3 sync . s3://${S3_BUCKET}/${ENV} --delete --region us-east-1
+      - echo Current directory is
+      - pwd
+      - py.test --collect-only tests/
+      - find . -name '__pycache__' -type d -exec rm -r {} +
+      - find . -name '*.pyc' -exec rm -f {} +
+      - find . -name '*.pyo' -exec rm -f {} +
+      - find . -name '*~' -exec rm -f {} +
+      - pip freeze > requirements.txt
+      - zip -r test_bundle.zip tests/ requirements.txt
+      - pwd
     finally:
       - echo This always runs even if the install command fails
   post_build:
