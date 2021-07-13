@@ -8,6 +8,7 @@ phases:
       #- cd workspace
       #- source bin/activate
       - pip install pytest
+      - pytest --version
       - pip install Appium-Python-Client
     finally:
       - echo This always runs even if the update or install command fails 
@@ -21,7 +22,8 @@ phases:
       - echo Entered the build phase..
       - echo Current directory is
       - pwd
-      - py.test --collect-only tests/
+      - cd Tests
+      - pytest --collect-only tests/
       - find . -name '__pycache__' -type d -exec rm -r {} +
       - find . -name '*.pyc' -exec rm -f {} +
       - find . -name '*.pyo' -exec rm -f {} +
