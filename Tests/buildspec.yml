@@ -23,16 +23,8 @@ phases:
       - echo Entered the build phase..
       - echo Current directory is
       - pwd
-      - cd Tests
-      - pytest --collect-only tests/
-      - find . -name '__pycache__' -type d -exec rm -r {} +
-      - find . -name '*.pyc' -exec rm -f {} +
-      - find . -name '*.pyo' -exec rm -f {} +
-      - find . -name '*~' -exec rm -f {} +
-      - pip3 freeze > requirements.txt
-      - zip -r test_bundle.zip tests/ requirements.txt
-      - pwd
-      - ls -l
+      - cd Tests/tests
+      - pytest
     finally:
       - echo This always runs even if the install command fails
   post_build:
@@ -42,5 +34,4 @@ phases:
 
 artifacts:
   files:
-    - 'Tests/test_bundle.zip'
-  discard-paths: yes
+    - '**/*'

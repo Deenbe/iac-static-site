@@ -2,6 +2,8 @@
 import pytest
 import time
 import json
+import boto3
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -12,23 +14,24 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 class TestDefaultSuite():
   def setup_method(self, method):
-    self.driver = webdriver.Firefox()
-    self.vars = {}
+    devicefarm_client = boto3.client("devicefarm", region_name="us-west-2")
+    testgrid_url_response = devicefarm_client.create_test_grid_url(projectArn=os.environ.get('DEVICE_POOL_ARN'),expiresInSeconds=300)
+    self.driver = selenium.webdriver.Remote(testgrid_url_response["url"], selenium.webdriver.DesiredCapabilities.FIREFOX, selenium.webdriver)
   
   def teardown_method(self, method):
     self.driver.quit()
   
   def test_deepLinks(self):
-    self.driver.get("https://iac-spa-demo.jonesaws.people.aws.dev/")
+    self.driver.get("https://" + os.environ.get('SITE_URL') + "/")
     self.driver.set_window_size(550, 691)
     assert self.driver.find_element(By.CSS_SELECTOR, "h2").text == "Welcome to the Demo Single Page App :)"
-    self.driver.get("https://iac-spa-demo.jonesaws.people.aws.dev/about")
+    self.driver.get("https://" + os.environ.get('SITE_URL') + "/about")
     assert self.driver.find_element(By.CSS_SELECTOR, "h2").text == "Welcome to the About page"
-    self.driver.get("https://iac-spa-demo.jonesaws.people.aws.dev/contact")
+    self.driver.get("https://" + os.environ.get('SITE_URL') + "/contact")
     assert self.driver.find_element(By.CSS_SELECTOR, "h2").text == "Welcome to the Contact page"
   
   def test_navMenu(self):
-    self.driver.get("https://iac-spa-demo.jonesaws.people.aws.dev/")
+    self.driver.get("https://" + os.environ.get('SITE_URL') + "/")
     self.driver.set_window_size(550, 691)
     assert self.driver.find_element(By.CSS_SELECTOR, "h2").text == "Welcome to the Demo Single Page App :)"
     self.driver.find_element(By.LINK_TEXT, "About").click()
