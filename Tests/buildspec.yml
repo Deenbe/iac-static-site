@@ -20,7 +20,7 @@ phases:
     commands:
       - echo Entered the build phase..
       - cd Tests/tests
-      - pytest -A
+      - pytest --junitxml=results.xml
     finally:
       - echo This always runs even if the install command fails
   post_build:
@@ -30,4 +30,4 @@ phases:
 
 artifacts:
   files:
-    - '**/*'
+    - 'Tests/tests/results.xml'
