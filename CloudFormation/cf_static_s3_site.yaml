@@ -367,7 +367,7 @@ Resources:
               Provider: CodeStarSourceConnection
             Configuration:
               ConnectionArn: !Ref GitHubConnection
-              FullRepositoryId: 'jonesaws/iac-static-site'
+              FullRepositoryId: !Ref GitHubRepositoryId
               BranchName: main
               DetectChanges: true
               OutputArtifactFormat: CODE_ZIP

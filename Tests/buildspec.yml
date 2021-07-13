@@ -7,10 +7,10 @@ phases:
       #- virtualenv workspace
       #- cd workspace
       #- source bin/activate
-      - pip install --upgrade pip
-      - pip install pytest
+      - pip3 install -U --upgrade pip3
+      - pip3 install -U pytest
       - pytest --version
-      - pip install Appium-Python-Client
+      - pip3 install Appium-Python-Client
     finally:
       - echo This always runs even if the update or install command fails 
   pre_build:
