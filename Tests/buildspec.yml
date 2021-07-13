@@ -4,9 +4,6 @@ phases:
   install:
     commands:
       - echo Entered the install phase...
-      #- virtualenv workspace
-      #- cd workspace
-      #- source bin/activate
       - pip3 install -U --upgrade pip
       - pip3 install -U selenium
       - pip3 install -U pytest
@@ -25,7 +22,7 @@ phases:
       - echo Current directory is
       - pwd
       - cd Tests/tests
-      - pytest
+      - pytest -s
     finally:
       - echo This always runs even if the install command fails
   post_build:

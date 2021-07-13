@@ -6,6 +6,8 @@ import boto3
 import os
 import selenium
 from selenium import webdriver
+from selenium.webdriver import DesiredCapabilities
+from selenium.webdriver import Remote
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions
@@ -17,7 +19,11 @@ class TestDefaultSuite():
   def setup_method(self, method):
     devicefarm_client = boto3.client("devicefarm", region_name="us-west-2")
     testgrid_url_response = devicefarm_client.create_test_grid_url(projectArn=os.environ.get('DEVICE_POOL_ARN'),expiresInSeconds=300)
-    self.driver = selenium.webdriver.Remote(testgrid_url_response["url"], selenium.webdriver.DesiredCapabilities.FIREFOX, selenium.webdriver)
+
+    desired_capabilities = DesiredCapabilities.FIREFOX
+    desired_capabilities["platform"] = "windows"
+
+    self.driver = Remote(testgrid_url_response["url"], desired_capabilities)
   
   def teardown_method(self, method):
     self.driver.quit()
