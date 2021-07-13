@@ -20,11 +20,14 @@ class TestDefaultSuite():
     devicefarm_client = boto3.client("devicefarm", region_name="us-west-2")
     testgrid_url_response = devicefarm_client.create_test_grid_url(projectArn=os.environ.get('DEVICE_POOL_ARN'),expiresInSeconds=300)
 
-    desired_capabilities = DesiredCapabilities.FIREFOX
-    
-    desired_capabilities["platform"] = "windows"
-
-    self.driver = Remote(testgrid_url_response["url"], desired_capabilities)
+    if(os.environ.get('BROWSER').equals("firefox")):
+      firefox_desired_capabilities = DesiredCapabilities.FIREFOX
+      firefox_desired_capabilities["platform"] = "windows"
+      self.driver = Remote(testgrid_url_response["url"], firefox_desired_capabilities)
+    elif((os.environ.get('BROWSER').equals("chrome")))
+      chrome_desired_capabilities = DesiredCapabilities.CHROME
+      chrome_desired_capabilities["platform"] = "windows"
+      self.driver = Remote(testgrid_url_response["url"], chrome_desired_capabilities) 
   
   def teardown_method(self, method):
     self.driver.quit()

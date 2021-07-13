@@ -457,8 +457,7 @@ Resources:
             - Name: DeployTestOutput
         - Name: TestSite
           Actions:
-          - Name: build-and-run-test-suite
-            RunOrder: 1
+          - Name: test-suite-firefox
             InputArtifacts:
             - Name: SourceOutput
             ActionTypeId:
@@ -468,9 +467,22 @@ Resources:
               Provider: CodeBuild
             Configuration:
               ProjectName: !Ref TestSuiteCodeBuildProject
-              EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"SITE_URL","value":"https://',!Ref SiteIPv4DnsRecord,'"},{"name":"DEVICE_POOL_ARN","value":"',!Ref DevicePoolArn,'"}]']]
+              EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"BROWSER","value":"firefox"},{"name":"SITE_URL","value":"https://',!Ref SiteIPv4DnsRecord,'"},{"name":"DEVICE_POOL_ARN","value":"',!Ref DevicePoolArn,'"}]']]
             OutputArtifacts:
-            - Name: DeployTestSuiteOutput
+            - Name: TestSuiteFirefoxOutput
+          - Name: test-suite-chrome
+            InputArtifacts:
+            - Name: SourceOutput
+            ActionTypeId:
+              Category: Test
+              Owner: AWS
+              Version: '1'
+              Provider: CodeBuild
+            Configuration:
+              ProjectName: !Ref TestSuiteCodeBuildProject
+              EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"BROWSER","value":"chrome"},{"name":"SITE_URL","value":"https://',!Ref SiteIPv4DnsRecord,'"},{"name":"DEVICE_POOL_ARN","value":"',!Ref DevicePoolArn,'"}]']]
+            OutputArtifacts:
+            - Name: TestSuiteChromeOutput
         - Name: DeployLive
           Actions:
           - Name: Deploy-to-S3-live
