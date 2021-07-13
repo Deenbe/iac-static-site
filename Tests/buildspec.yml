@@ -8,6 +8,7 @@ phases:
       #- cd workspace
       #- source bin/activate
       - pip3 install -U --upgrade pip
+      - pip3 install -U typing
       - pip3 install -U pytest
       - pytest --version
       - pip3 install Appium-Python-Client
