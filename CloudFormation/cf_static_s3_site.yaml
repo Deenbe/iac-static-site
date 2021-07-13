@@ -214,7 +214,6 @@ Resources:
     Properties:
       Name: !Sub ${AWS::StackName}-site-build-project
       Description: CodeBuild Project to deploy the website
-      BuildSpec: Site/buildspec.yml
       ServiceRole: !GetAtt CodeBuildServiceRole.Arn
       Artifacts:
         Type: CODEPIPELINE
@@ -224,6 +223,7 @@ Resources:
         Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
       Source:
         Type:  CODEPIPELINE
+        BuildSpec: Site/buildspec.yml
       TimeoutInMinutes: 10
   
   #code build - api deployment using SAM (see buildspec.yml)
@@ -232,7 +232,6 @@ Resources:
     Properties:
       Name: !Sub ${AWS::StackName}-test-suite-build-project
       Description: CodeBuild Project to build the python test suite archive
-      BuildSpec: Tests/buildspec.yml
       ServiceRole: !GetAtt CodeBuildServiceRole.Arn
       Artifacts:
         Type: CODEPIPELINE
@@ -242,6 +241,7 @@ Resources:
         Image: aws/codebuild/eb-python-3.4-amazonlinux-64:2.3.2
       Source:
         Type:  CODEPIPELINE
+        BuildSpec: Tests/buildspec.yml
       TimeoutInMinutes: 10
 
   DeploymentPipelineTopic:
@@ -368,7 +368,7 @@ Resources:
             Configuration:
               ConnectionArn: !Ref GitHubConnection
               FullRepositoryId: 'jonesaws/iac-static-site'
-              BranchName: live
+              BranchName: main
               DetectChanges: true
               OutputArtifactFormat: CODE_ZIP
             OutputArtifacts:
@@ -388,9 +388,10 @@ Resources:
               ProjectName: !Ref TestSuiteCodeBuildProject
               #EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"S3_BUCKET","value":"',!Ref SiteS3Bucket,'"}]']]
             OutputArtifacts:
+            - Name: DeployTestSuiteOutput
         - Name: DeployTest
           Actions:
-          - Name: Deploy-to-S3-live
+          - Name: Deploy-to-S3-test
             RunOrder: 1
             InputArtifacts:
             - Name: SourceOutput
@@ -403,6 +404,7 @@ Resources:
               ProjectName: !Ref WebsiteCodeBuildProject
               EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"S3_BUCKET","value":"',!Ref SiteS3Bucket,'"}]']]
             OutputArtifacts:
+            - Name: DeployTestOutput
         #- Name: TestSite
         #  Actions:
         #    - Name: TestDeviceFarm
@@ -440,7 +442,7 @@ Resources:
               ProjectName: !Ref WebsiteCodeBuildProject
               EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"live"},{"name":"S3_BUCKET","value":"',!Ref SiteS3Bucket,'"}]']]
             OutputArtifacts:
-            - Name: BuildOutput
+            - Name: BuildLiveOutput
 
 Outputs:
   AssetS3BucketName:
