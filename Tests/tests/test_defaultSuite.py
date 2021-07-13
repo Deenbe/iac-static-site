@@ -21,6 +21,7 @@ class TestDefaultSuite():
     testgrid_url_response = devicefarm_client.create_test_grid_url(projectArn=os.environ.get('DEVICE_POOL_ARN'),expiresInSeconds=300)
 
     desired_capabilities = DesiredCapabilities.FIREFOX
+    
     desired_capabilities["platform"] = "windows"
 
     self.driver = Remote(testgrid_url_response["url"], desired_capabilities)
@@ -29,16 +30,16 @@ class TestDefaultSuite():
     self.driver.quit()
   
   def test_deepLinks(self):
-    self.driver.get("https://" + os.environ.get('SITE_URL') + "/")
+    self.driver.get(os.environ.get('SITE_URL') + "/")
     self.driver.set_window_size(550, 691)
     assert self.driver.find_element(By.CSS_SELECTOR, "h2").text == "Welcome to the Demo Single Page App :)"
-    self.driver.get("https://" + os.environ.get('SITE_URL') + "/about")
+    self.driver.get(os.environ.get('SITE_URL') + "/about")
     assert self.driver.find_element(By.CSS_SELECTOR, "h2").text == "Welcome to the About page"
-    self.driver.get("https://" + os.environ.get('SITE_URL') + "/contact")
+    self.driver.get(os.environ.get('SITE_URL') + "/contact")
     assert self.driver.find_element(By.CSS_SELECTOR, "h2").text == "Welcome to the Contact page"
   
   def test_navMenu(self):
-    self.driver.get("https://" + os.environ.get('SITE_URL') + "/")
+    self.driver.get(os.environ.get('SITE_URL') + "/")
     self.driver.set_window_size(550, 691)
     assert self.driver.find_element(By.CSS_SELECTOR, "h2").text == "Welcome to the Demo Single Page App :)"
     self.driver.find_element(By.LINK_TEXT, "About").click()
