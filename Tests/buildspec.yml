@@ -7,6 +7,7 @@ phases:
       #- virtualenv workspace
       #- cd workspace
       #- source bin/activate
+      - pip install --upgrade pip
       - pip install pytest
       - pytest --version
       - pip install Appium-Python-Client
