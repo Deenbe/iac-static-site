@@ -4,9 +4,9 @@ phases:
   install:
     commands:
       - echo Entered the install phase...
-      - virtualenv workspace
-      - cd workspace
-      - source bin/activate
+      #- virtualenv workspace
+      #- cd workspace
+      #- source bin/activate
       - pip install pytest
       - pip install Appium-Python-Client
     finally:
