@@ -7,7 +7,7 @@ phases:
       #- virtualenv workspace
       #- cd workspace
       #- source bin/activate
-      - pip3 install -U --upgrade pip3
+      - pip3 install -U --upgrade pip
       - pip3 install -U pytest
       - pytest --version
       - pip3 install Appium-Python-Client
@@ -29,7 +29,7 @@ phases:
       - find . -name '*.pyc' -exec rm -f {} +
       - find . -name '*.pyo' -exec rm -f {} +
       - find . -name '*~' -exec rm -f {} +
-      - pip freeze > requirements.txt
+      - pip3 freeze > requirements.txt
       - zip -r test_bundle.zip tests/ requirements.txt
       - pwd
     finally:
