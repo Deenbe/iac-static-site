@@ -24,7 +24,7 @@ class TestDefaultSuite():
       firefox_desired_capabilities = DesiredCapabilities.FIREFOX
       firefox_desired_capabilities["platform"] = "windows"
       self.driver = Remote(testgrid_url_response["url"], firefox_desired_capabilities)
-    elif((os.environ.get('BROWSER').equals("chrome")))
+    elif(os.environ.get('BROWSER').equals("chrome")):
       chrome_desired_capabilities = DesiredCapabilities.CHROME
       chrome_desired_capabilities["platform"] = "windows"
       self.driver = Remote(testgrid_url_response["url"], chrome_desired_capabilities) 
