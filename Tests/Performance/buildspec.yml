@@ -18,11 +18,15 @@ phases:
   pre_build:
     commands:
       - echo Entered the pre_build phase...
+      - cd ../Tests/Performance
+      - mkdir results
     finally:
       - echo This always runs even if the login command fails 
   build:
     commands:
       - echo Entered the build phase..
+      - artillery run --target $SITE_URL --output results/report.json tests/perf-test.yaml
+      - artillery report --output results/perf-test.html results/report.json
     finally:
       - echo This always runs even if the install command fails
   post_build:

@@ -685,10 +685,10 @@ Resources:
             InputArtifacts:
             - Name: SourceOutput
             ActionTypeId:
-              Category: Test
-              Owner: ThirdParty
+              Category: Build
+              Owner: AWS
               Version: '1'
-              Provider: Custom BlazeMeter
+              Provider: CodeBuild
             Configuration:
               ProjectName: !Ref WebsiteCodeBuildProject
               EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"live"},{"name":"S3_BUCKET","value":"',!Ref SiteS3Bucket,'"}]']]
