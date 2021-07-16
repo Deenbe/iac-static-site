@@ -470,12 +470,12 @@ Resources:
         Type: CODEPIPELINE
       Environment:
         Type: LINUX_CONTAINER
-        ComputeType: BUILD_GENERAL1_SMALL
+        ComputeType: BUILD_GENERAL1_LARGE
         Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
       Source:
         Type:  CODEPIPELINE
         BuildSpec: Tests/Performance/buildspec.yml
-      TimeoutInMinutes: 10
+      TimeoutInMinutes: 20
 
   DeploymentPipelineTopic:
     Type: "AWS::SNS::Topic"
