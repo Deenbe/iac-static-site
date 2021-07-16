@@ -10,7 +10,6 @@ phases:
       - node --version
       - mkdir artillery
       - cd artillery
-      - npm init
       - npm install -g artillery@latest
       - artillery dino
     finally:

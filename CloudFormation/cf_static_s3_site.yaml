@@ -567,6 +567,7 @@ Resources:
                 Resource: 
                   - !GetAtt WebsiteCodeBuildProject.Arn
                   - !GetAtt TestSuiteCodeBuildProject.Arn
+                  - !GetAtt PerformanceTestCodeBuildProject.Arn
               -
                 Effect: "Allow"
                 Action:
