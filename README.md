@@ -12,13 +12,13 @@ Sadly this template can only be deployed "as-is" in the us-east-1 region, as Clo
   - CodeStar Connections (for connectivity to GitHub)
 - Route53
 - CloudFront
-  - CloudFront Distribution
+  - CloudFront Distributions
   - CloudFront S3 Origin
   - Custom Domain Names and SSL Termination
   - Origin Access Identities
   - CloudFront Functions
-    - Request Processing for SPA required, and for header based rewrites
-    - Response Processing for injection of headers (indicating which environment a user is seeing)
+    - Request Processing for SPA required rewrites
+    - Response Processing for injection of headers (confirming which environment a user is seeing)
 - Amazon Certificate Manager (ACM)
   - Generation and management of public site certificates
 - Private S3 Buckets for serving public content

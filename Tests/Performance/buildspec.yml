@@ -42,4 +42,4 @@ phases:
   #  file-format: JUNITXML
 artifacts:
   files:
-    - "**/*"
+    - "Tests/Performance/results/perf-test.html"
