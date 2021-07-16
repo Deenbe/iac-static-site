@@ -398,7 +398,83 @@ Resources:
         Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
       Source:
         Type:  CODEPIPELINE
-        BuildSpec: Tests/buildspec.yml
+        BuildSpec: Tests/Functional/buildspec.yml
+      TimeoutInMinutes: 10
+  
+  PerformanceTestCodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: ${AWS::StackName}-PerfTestCodeBuildServiceRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        -
+          Effect: "Allow"
+          Principal:
+            Service:
+            - "codebuild.amazonaws.com"
+          Action:
+          - "sts:AssumeRole"
+      Path: /service-role/
+      Policies:
+      -
+        PolicyName:
+          Fn::Sub: ${AWS::StackName}-CodeBuildServiceRole-Policy
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: "Allow"
+            Action:
+              - "codebuild:CreateReportGroup"
+              - "codebuild:CreateReport"
+              - "codebuild:UpdateReport"
+              - "codebuild:BatchPutTestCases"
+            Resource:
+              - "*"
+          -
+            Effect: "Allow"
+            Action:
+            - "logs:CreateLogGroup"
+            - "logs:CreateLogStream"
+            - "logs:PutLogEvents"
+            Resource:
+            - Fn::Sub: arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*
+          -
+            Effect: "Allow"
+            Action:
+            - "s3:PutObject"
+            - "s3:GetObject"
+            - "s3:GetObjectVersion"
+            - "s3:DeleteObject"
+            - "s3:ListBucket"
+            Resource:
+            - Fn::Sub: arn:aws:s3:::${SiteS3Bucket}/*
+            - Fn::Sub: arn:aws:s3:::${SiteS3Bucket}
+            - Fn::Sub: arn:aws:s3:::${ArtifactS3Bucket}/*
+            - Fn::Sub: arn:aws:s3:::${ArtifactS3Bucket}
+          -
+            Effect: "Allow"
+            Action:
+            - "iam:PassRole"
+            Resource:
+            - "*"
+  
+  PerformanceTestCodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub ${AWS::StackName}-perf-test-project
+      Description: CodeBuild Project to execute a basic load test
+      ServiceRole: !GetAtt PerformanceTestCodeBuildServiceRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+      Source:
+        Type:  CODEPIPELINE
+        BuildSpec: Tests/Performance/buildspec.yml
       TimeoutInMinutes: 10
 
   DeploymentPipelineTopic:
@@ -546,7 +622,7 @@ Resources:
               EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"S3_BUCKET","value":"',!Ref SiteS3Bucket,'"}]']]
             OutputArtifacts:
             - Name: DeployTestOutput
-        - Name: TestSite
+        - Name: RegressionTesting
           Actions:
           - Name: test-suite-firefox
             InputArtifacts:
@@ -587,6 +663,21 @@ Resources:
               EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"BROWSER","value":"ie"},{"name":"SITE_URL","value":"https://',!Ref TestSiteIPv4DnsRecord,'"},{"name":"DEVICE_POOL_ARN","value":"',!Ref DevicePoolArn,'"}]']]
             OutputArtifacts:
             - Name: TestSuiteIeOutput
+        - Name: PerformanceTesting
+          Actions:
+          - Name: artillery-load-test
+            InputArtifacts:
+            - Name: SourceOutput
+            ActionTypeId:
+              Category: Test
+              Owner: AWS
+              Version: '1'
+              Provider: CodeBuild
+            Configuration:
+              ProjectName: !Ref PerformanceTestCodeBuildProject
+              EnvironmentVariables: !Join ['',['[{"name":"SITE_URL","value":"https://',!Ref TestSiteIPv4DnsRecord,'"}]']]
+            OutputArtifacts:
+            - Name: PerfTestOutput
         - Name: DeployLive
           Actions:
           - Name: Deploy-to-S3-live
@@ -594,10 +685,10 @@ Resources:
             InputArtifacts:
             - Name: SourceOutput
             ActionTypeId:
-              Category: Build
-              Owner: AWS
+              Category: Test
+              Owner: ThirdParty
               Version: '1'
-              Provider: CodeBuild
+              Provider: Custom BlazeMeter
             Configuration:
               ProjectName: !Ref WebsiteCodeBuildProject
               EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"live"},{"name":"S3_BUCKET","value":"',!Ref SiteS3Bucket,'"}]']]
