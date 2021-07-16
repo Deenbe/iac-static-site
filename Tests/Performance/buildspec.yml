@@ -4,13 +4,15 @@ phases:
   install:
     commands:
       - echo Entered the install phase...
-      - yum -y install curl
-      - curl -sL https://rpm.nodesource.com/setup_14.x
+      #- yum -y install curl
+      - yum remove nodejs
+      - curl -sL https://rpm.nodesource.com/setup_14.x | bash
       - yum install -y nodejs
       - node --version
       - mkdir artillery
       - cd artillery
       - npm install -g artillery@latest
+      - npm init
       - artillery dino
     finally:
       - echo This always runs even if the update or install command fails 
