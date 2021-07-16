@@ -1,4 +1,6 @@
 config:
+  http:
+    timeout: 10
   ensure:
     maxErrorRate: 1
   phases:
@@ -12,3 +14,11 @@ config:
     - duration: 600
       arrivalRate: 50
       name: Sustained load
+scenarios:
+  - flow:
+      - get:
+          url: "/"
+      - get:
+          url: "/about"
+      - get:
+          url: "/contact"

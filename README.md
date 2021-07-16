@@ -31,11 +31,12 @@ Sadly this template can only be deployed "as-is" in the us-east-1 region, as Clo
 * Git clone this repo
 * Deploy ./CloudFormation/cf_static_s3_site.yaml using CloudFormation
 * Setup/activate the created CodeStar Connection via CodePipeline (CodePipeline > Settings > Connections)
-* Release a change for both pipelines (they initially fail on creation due to the connection not being setup initially)
-* Access the site using the CF Stack Output "SiteAddress"
-* Make changes to the site code, push and merge to "test" branch
-* Set a HTTP request header "app-version" = "test" to view your changes in test
-* Merge to "live" branch and remove the HTTP header to view your changes in production
+* Release a change for the pipeline (they initially fail on creation due to the connection not being setup initially)
+* Access the site using the CF Stack Output "TestSiteAddress"
+* Make changes to the site code and push the "main" branch
+* Monitor progress through CodePipeline, DeviceFarm and various other supporting services
+* Access the live site using the CF Stack Output "LiveSiteAddress"
+* Review testing results through CodeDeploy
 * Provide feedback to jonesaws@amazon.com 
 
 ## Cleanup
