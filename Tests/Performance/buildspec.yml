@@ -18,6 +18,8 @@ phases:
     commands:
       - echo Entered the pre_build phase...
       - cd ../Tests/Performance
+      - export MULTICORE=1
+      - export ARTILLERY_WORKERS=6
       - mkdir results
   build:
     commands:
