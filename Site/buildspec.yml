@@ -14,8 +14,9 @@ phases:
   build:
     commands:
       - echo Entered the build phase..
+      - printenv
       - cd Site/html
-      - aws s3 sync . s3://${S3_BUCKET}/${ENV} --delete --region us-east-1
+      - aws s3 sync . s3://${S3_BUCKET}/${CODEBUILD_SOURCE_VERSION} --delete --region us-east-1
     finally:
       - echo This always runs even if the install command fails
   post_build:

@@ -57,8 +57,14 @@ Resources:
               AWS: !Sub 'arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${LiveCloudfrontOriginAccessIdentity}'
           - Action:
               - 's3:GetObject'
+            Effect: Deny
+            Resource: !Join ['',[!GetAtt SiteS3Bucket.Arn,'/live/*']]
+            Principal: 
+              AWS: !Sub 'arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${TestCloudfrontOriginAccessIdentity}'
+          - Action:
+              - 's3:GetObject'
             Effect: Allow
-            Resource: !Join ['',[!GetAtt SiteS3Bucket.Arn,'/test/*']]
+            Resource: !Join ['',[!GetAtt SiteS3Bucket.Arn,'/*']]
             Principal: 
               AWS: !Sub 'arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${TestCloudfrontOriginAccessIdentity}'
   
@@ -94,14 +100,18 @@ Resources:
           var headers = request.headers;
           var host = headers.host.value
           var uri = request.uri;
-          if(host === "${TestDomainName}")
+          
+          //The request is for a Test version of the site
+          if(host === "${TestDomainName}" && headers['site-version'])
           {
+            var siteVersion = headers['site-version'].value;
             if(uri.endsWith('/') || uri.endsWith('/about') || uri.endsWith('/contact'))
             {
-              request.uri = '/test/index.html';
+              request.uri = '/' + siteVersion + '/index.html';
             } 
-            else request.uri = '/test' + uri;
+            else request.uri = '/' + siteVersion + uri;
           }
+          //The request is for the Live site
           else
           {
             if(uri.endsWith('/') || uri.endsWith('/about') || uri.endsWith('/contact'))
@@ -122,7 +132,7 @@ Resources:
         Comment: Response processing CF Function
         Runtime: cloudfront-js-1.0
       AutoPublish: true
-      FunctionCode: !Sub |
+      FunctionCode: |
         function handler(event) {
           var response = event.response;
           var request = event.request;
@@ -605,6 +615,7 @@ Resources:
               BranchName: main
               DetectChanges: true
               OutputArtifactFormat: CODE_ZIP
+            Namespace: GitHubVariables
             OutputArtifacts:
             - Name: SourceOutput
         - Name: DeployTest
