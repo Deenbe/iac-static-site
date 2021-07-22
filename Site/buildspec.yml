@@ -1,5 +1,8 @@
 version: 0.2
 
+env:
+  exported-variales:
+    - SITE_VERSION_PATH_PREFIX
 phases:
   install:
     commands:
@@ -14,16 +17,16 @@ phases:
   build:
     commands:
       - echo Entered the build phase..
+      - export SITE_VERSION_PATH_PREFIX=${COMMIT:0:7}
       - printenv
       - cd Site/html
-      - aws s3 sync . s3://${S3_BUCKET}/${CODEBUILD_SOURCE_VERSION} --delete --region us-east-1
+      - aws s3 sync . s3://${S3_BUCKET}/${SITE_VERSION_PATH_PREFIX} --delete --region us-east-1
     finally:
       - echo This always runs even if the install command fails
   post_build:
     commands:
       - echo Entered the post_build phase...
       - echo Build completed on `date`
-
 artifacts:
   files:
     - '**/*'

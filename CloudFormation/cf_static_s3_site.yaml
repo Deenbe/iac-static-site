@@ -631,7 +631,7 @@ Resources:
               Provider: CodeBuild
             Configuration:
               ProjectName: !Ref WebsiteCodeBuildProject
-              EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"S3_BUCKET","value":"',!Ref SiteS3Bucket,'"}]']]
+              EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"S3_BUCKET","value":"',!Ref SiteS3Bucket,'"},{"name":"COMMIT","value":"#{GitHubVariables.CommitId}"}]']]
             OutputArtifacts:
             - Name: DeployTestOutput
         - Name: RegressionTesting
