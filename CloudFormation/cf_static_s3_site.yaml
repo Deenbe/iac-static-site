@@ -102,14 +102,27 @@ Resources:
           var uri = request.uri;
           
           //The request is for a Test version of the site
-          if(host === "${TestDomainName}" && headers['site-version'])
+          if(host === "${TestDomainName}")
           {
-            var siteVersion = headers['site-version'].value;
             if(uri.endsWith('/') || uri.endsWith('/about') || uri.endsWith('/contact'))
             {
-              request.uri = '/' + siteVersion + '/index.html';
+              if(uri.endsWith('/'))
+              {
+                request.uri = request.uri + 'index.html';
+              }
+              else
+              {
+                console.log("original uri: " + uri);
+                
+                var uriWithoutPage = uri.split("/").slice(0,-1).join('/');
+                var newUri = uriWithoutPage + "/index.html";
+
+                console.log("uri without page: " + uriWithoutPage);
+                console.log("returned uri: " + newUri);
+                
+                request.uri = newUri
+              }
             } 
-            else request.uri = '/' + siteVersion + uri;
           }
           //The request is for the Live site
           else
@@ -621,6 +634,7 @@ Resources:
         - Name: DeployTest
           Actions:
           - Name: Deploy-to-S3-test
+            Namespace: DeployTest
             RunOrder: 1
             InputArtifacts:
             - Name: SourceOutput
@@ -646,7 +660,7 @@ Resources:
               Provider: CodeBuild
             Configuration:
               ProjectName: !Ref TestSuiteCodeBuildProject
-              EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"BROWSER","value":"firefox"},{"name":"SITE_URL","value":"https://',!Ref TestSiteIPv4DnsRecord,'"},{"name":"DEVICE_POOL_ARN","value":"',!Ref DevicePoolArn,'"}]']]
+              EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"BROWSER","value":"firefox"},{"name":"SITE_URL","value":"https://',!Ref TestSiteIPv4DnsRecord,'"},{"name":"DEVICE_POOL_ARN","value":"',!Ref DevicePoolArn,'"},{"name":"SITE_VERSION_PATH_PREFIX","value":"#{DeployTest.SITE_VERSION_PATH_PREFIX}"}]']]
             OutputArtifacts:
             - Name: TestSuiteFirefoxOutput
           - Name: test-suite-chrome
@@ -659,7 +673,7 @@ Resources:
               Provider: CodeBuild
             Configuration:
               ProjectName: !Ref TestSuiteCodeBuildProject
-              EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"BROWSER","value":"chrome"},{"name":"SITE_URL","value":"https://',!Ref TestSiteIPv4DnsRecord,'"},{"name":"DEVICE_POOL_ARN","value":"',!Ref DevicePoolArn,'"}]']]
+              EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"BROWSER","value":"chrome"},{"name":"SITE_URL","value":"https://',!Ref TestSiteIPv4DnsRecord,'"},{"name":"DEVICE_POOL_ARN","value":"',!Ref DevicePoolArn,'"},{"name":"SITE_VERSION_PATH_PREFIX","value":"#{DeployTest.SITE_VERSION_PATH_PREFIX}"}]']]
             OutputArtifacts:
             - Name: TestSuiteChromeOutput
           - Name: test-suite-ie
@@ -672,7 +686,7 @@ Resources:
               Provider: CodeBuild
             Configuration:
               ProjectName: !Ref TestSuiteCodeBuildProject
-              EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"BROWSER","value":"ie"},{"name":"SITE_URL","value":"https://',!Ref TestSiteIPv4DnsRecord,'"},{"name":"DEVICE_POOL_ARN","value":"',!Ref DevicePoolArn,'"}]']]
+              EnvironmentVariables: !Join ['',['[{"name":"ENV","value":"test"},{"name":"BROWSER","value":"ie"},{"name":"SITE_URL","value":"https://',!Ref TestSiteIPv4DnsRecord,'"},{"name":"DEVICE_POOL_ARN","value":"',!Ref DevicePoolArn,'"},{"name":"SITE_VERSION_PATH_PREFIX","value":"#{DeployTest.SITE_VERSION_PATH_PREFIX}"}]']]
             OutputArtifacts:
             - Name: TestSuiteIeOutput
         - Name: PerformanceTesting
@@ -687,7 +701,7 @@ Resources:
               Provider: CodeBuild
             Configuration:
               ProjectName: !Ref PerformanceTestCodeBuildProject
-              EnvironmentVariables: !Join ['',['[{"name":"SITE_URL","value":"https://',!Ref TestSiteIPv4DnsRecord,'"}]']]
+              EnvironmentVariables: !Join ['',['[{"name":"SITE_URL","value":"https://',!Ref TestSiteIPv4DnsRecord,'"},{"name":"SITE_VERSION_PATH_PREFIX","value":"#{DeployTest.SITE_VERSION_PATH_PREFIX}"}]']]
             OutputArtifacts:
             - Name: PerfTestOutput
         - Name: DeployLive

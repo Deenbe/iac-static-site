@@ -4,15 +4,15 @@
 function renderApp() {
     var content;
     var title;
-    if (window.location.pathname === '/about') {
+    if (window.location.pathname.endsWith('/about')) {
       title = "SPA - About";
       content = '<h2>Welcome to the About page</h2><p>This a simple demonstration of an IaC deployed Single Page App behind CloudFront, served from a secure S3 bucket with deep linking capability.</p>';
     }
-    else if (window.location.pathname === '/contact') {
+    else if (window.location.pathname.endsWith('/contact')) {
         title = "SPA - Contact";
         content = '<h2>Welcome to the Contact page</h2><p>This a simple demonstration of an IaC deployed Single Page App behind CloudFront, served from a secure S3 bucket with deep linking capability.</p>';
     }
-    else if (window.location.pathname === '/') {
+    else if (window.location.pathname.endsWith('/')) {
       title = "SPA - Home";
       content = '<h2>Welcome to the Demo Single Page App :)</h2><p>This a simple demonstration of an IaC deployed Single Page App behind CloudFront, served from a secure S3 bucket with deep linking capability.</p>'
     }
