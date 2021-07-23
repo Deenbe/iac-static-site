@@ -46,7 +46,7 @@ class TestDefaultSuite():
     assert self.driver.find_element(By.CSS_SELECTOR, "h2").text == "Welcome to the Contact page"
   
   def test_navMenu(self):
-    self.driver.get(os.environ.get('SITE_URL') + "/")
+    self.driver.get(os.environ.get('SITE_URL') + "/" + os.environ.get('SITE_VERSION_PATH_PREFIX') + "/")
     self.driver.set_window_size(550, 691)
     assert self.driver.find_element(By.CSS_SELECTOR, "h2").text == "Welcome to the Demo Single Page App :)"
     self.driver.find_element(By.LINK_TEXT, "About").click()
