@@ -5,6 +5,7 @@ import json
 import boto3
 import os
 import selenium
+import logging
 from selenium import webdriver
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver import Remote
@@ -19,6 +20,9 @@ class TestDefaultSuite():
   def setup_method(self, method):
     devicefarm_client = boto3.client("devicefarm", region_name="us-west-2")
     testgrid_url_response = devicefarm_client.create_test_grid_url(projectArn=os.environ.get('DEVICE_POOL_ARN'),expiresInSeconds=300)
+    
+    self.site_url = os.environ.get('SITE_URL') + "/" + os.environ.get('SITE_VERSION_PATH_PREFIX')
+    logging.info("site url: " + self.site_url)
 
     if(os.environ.get('BROWSER') == "firefox"):
       firefox_desired_capabilities = DesiredCapabilities.FIREFOX
@@ -37,16 +41,16 @@ class TestDefaultSuite():
     self.driver.quit()
   
   def test_deepLinks(self):
-    self.driver.get(os.environ.get('SITE_URL') + "/" + os.environ.get('SITE_VERSION_PATH_PREFIX') + "/")
+    self.driver.get(self.site_url + "/")
     self.driver.set_window_size(550, 691)
     assert self.driver.find_element(By.CSS_SELECTOR, "h2").text == "Welcome to the Demo Single Page App :)"
-    self.driver.get(os.environ.get('SITE_URL') + "/" + os.environ.get('SITE_VERSION_PATH_PREFIX') + "/about")
+    self.driver.get(self.site_url + "/about")
     assert self.driver.find_element(By.CSS_SELECTOR, "h2").text == "Welcome to the About page"
-    self.driver.get(os.environ.get('SITE_URL') + "/" + os.environ.get('SITE_VERSION_PATH_PREFIX') + "/contact")
+    self.driver.get(self.site_url + "/contact")
     assert self.driver.find_element(By.CSS_SELECTOR, "h2").text == "Welcome to the Contact page"
   
   def test_navMenu(self):
-    self.driver.get(os.environ.get('SITE_URL') + "/" + os.environ.get('SITE_VERSION_PATH_PREFIX') + "/")
+    self.driver.get(self.site_url + "/")
     self.driver.set_window_size(550, 691)
     assert self.driver.find_element(By.CSS_SELECTOR, "h2").text == "Welcome to the Demo Single Page App :)"
     self.driver.find_element(By.LINK_TEXT, "About").click()
