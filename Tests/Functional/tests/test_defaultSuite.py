@@ -37,12 +37,12 @@ class TestDefaultSuite():
     self.driver.quit()
   
   def test_deepLinks(self):
-    self.driver.get(os.environ.get('SITE_URL') + "/")
+    self.driver.get(os.environ.get('SITE_URL') + "/" + os.environ.get('SITE_VERSION_PATH_PREFIX') + "/")
     self.driver.set_window_size(550, 691)
     assert self.driver.find_element(By.CSS_SELECTOR, "h2").text == "Welcome to the Demo Single Page App :)"
-    self.driver.get(os.environ.get('SITE_URL') + "/about")
+    self.driver.get(os.environ.get('SITE_URL') + "/" + os.environ.get('SITE_VERSION_PATH_PREFIX') + "/about")
     assert self.driver.find_element(By.CSS_SELECTOR, "h2").text == "Welcome to the About page"
-    self.driver.get(os.environ.get('SITE_URL') + "/contact")
+    self.driver.get(os.environ.get('SITE_URL') + "/" + os.environ.get('SITE_VERSION_PATH_PREFIX') + "/contact")
     assert self.driver.find_element(By.CSS_SELECTOR, "h2").text == "Welcome to the Contact page"
   
   def test_navMenu(self):

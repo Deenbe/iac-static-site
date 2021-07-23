@@ -701,7 +701,7 @@ Resources:
               Provider: CodeBuild
             Configuration:
               ProjectName: !Ref PerformanceTestCodeBuildProject
-              EnvironmentVariables: !Join ['',['[{"name":"SITE_URL","value":"https://',!Ref TestSiteIPv4DnsRecord,'"},{"name":"SITE_VERSION_PATH_PREFIX","value":"#{DeployTest.SITE_VERSION_PATH_PREFIX}"}]']]
+              EnvironmentVariables: !Join ['',['[{"name":"SITE_URL","value":"https://',!Ref TestSiteIPv4DnsRecord,'/#{DeployTest.SITE_VERSION_PATH_PREFIX}/"},{"name":"SITE_VERSION_PATH_PREFIX","value":"#{DeployTest.SITE_VERSION_PATH_PREFIX}"}]']]
             OutputArtifacts:
             - Name: PerfTestOutput
         - Name: DeployLive
