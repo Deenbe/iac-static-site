@@ -5,7 +5,6 @@ import json
 import boto3
 import os
 import selenium
-import logging
 from selenium import webdriver
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver import Remote
@@ -22,7 +21,7 @@ class TestDefaultSuite():
     testgrid_url_response = devicefarm_client.create_test_grid_url(projectArn=os.environ.get('DEVICE_POOL_ARN'),expiresInSeconds=300)
     
     self.site_url = os.environ.get('SITE_URL') + "/" + os.environ.get('SITE_VERSION_PATH_PREFIX')
-    logging.info("site url: " + self.site_url)
+    print("site url: " + self.site_url)
 
     if(os.environ.get('BROWSER') == "firefox"):
       firefox_desired_capabilities = DesiredCapabilities.FIREFOX
